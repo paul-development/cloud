@@ -10,7 +10,7 @@ public interface ICloudLogger {
 
     void info(String message);
 
-    void servere(String message);
+    void severe(String message);
 
     void warning(String message);
 

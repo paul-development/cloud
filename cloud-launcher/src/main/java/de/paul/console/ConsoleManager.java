@@ -1,13 +1,13 @@
 package de.paul.console;
 
 import de.paul.CloudLauncher;
-import de.paul.console.setup.SetupBuilder;
+import de.paul.command.ICommandHandler;
 import jdk.internal.org.jline.reader.LineReader;
 import jdk.internal.org.jline.reader.LineReaderBuilder;
+import jdk.internal.org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
@@ -20,13 +20,13 @@ import java.nio.charset.Charset;
 public class ConsoleManager {
 
     private final LineReader lineReader;
-    private final ConsoleCompleter completer;
+    private final ConsoleCompleter consoleCompleter;
     private final String prompt =
             System.getProperty("user.name") + "@" + Color.CYAN + "cloud-v1.0.0" + " $ ";
     private Thread thread;
 
     public ConsoleManager() {
-        completer = new ConsoleCompleter();
+        consoleCompleter = new ConsoleCompleter();
         lineReader = createLineReader();
     }
 
@@ -37,7 +37,7 @@ public class ConsoleManager {
                 .encoding(Charset.forName("UTF-8"))
                 .build()) {
             return LineReaderBuilder.builder()
-                    .completer(completer)
+                    .completer(consoleCompleter)
                     .terminal((jdk.internal.org.jline.terminal.Terminal) terminal)
                     .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
                     .build();
@@ -53,18 +53,20 @@ public class ConsoleManager {
                 String line;
                 while (!Thread.currentThread().isInterrupted()) {
                     line = lineReader.readLine(prompt);
-                    handle
+                    handleInput(line);
                 }
+            } catch (UserInterruptException ignored) {
             }
-        })
+        });
+        thread.start();
     }
 
     public void handleInput(String input) {
 
-        if (SetupBuilder.getCurrentSetup() != null) {
+       /* if (SetupBuilder.getCurrentSetup() != null) {
             SetupBuilder.nextQuestion(SetupBuilder.getCurrentSetup().getCurrentInput().handle(input));
             return;
-        }
+        }*/
 
         if (input.isEmpty()) {
             return;
@@ -80,5 +82,22 @@ public class ConsoleManager {
         commandHandler.handle(CloudLauncher.getInstance().getConsoleSender(), args);
     }
 
+    public void stopThread() {
+        lineReader.getTerminal().reader().shutdown();
+        lineReader.getTerminal().pause();
+        thread.interrupt();
+    }
+
+    public LineReader getLineReader() {
+        return lineReader;
+    }
+
+    public ConsoleCompleter getConsoleCompleter() {
+        return consoleCompleter;
+    }
+
+    public String getPrefix() {
+        return prompt;
+    }
 
 }
