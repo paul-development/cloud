@@ -2,6 +2,7 @@ package de.paul.console;
 
 import de.paul.CloudLauncher;
 import de.paul.command.ICommandHandler;
+import de.paul.console.setup.SetupBuilder;
 import jdk.internal.org.jline.reader.LineReader;
 import jdk.internal.org.jline.reader.LineReaderBuilder;
 import jdk.internal.org.jline.reader.UserInterruptException;
@@ -63,10 +64,10 @@ public class ConsoleManager {
 
     public void handleInput(String input) {
 
-       /* if (SetupBuilder.getCurrentSetup() != null) {
+        if (SetupBuilder.getCurrentSetup() != null) {
             SetupBuilder.nextQuestion(SetupBuilder.getCurrentSetup().getCurrentInput().handle(input));
             return;
-        }*/
+        }
 
         if (input.isEmpty()) {
             return;
